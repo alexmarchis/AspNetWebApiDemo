@@ -21,6 +21,20 @@ namespace ParkingLotV1.Controllers
             return "value";
         }
 
+        // GET api/values/getbycategory/ABC/1
+        [HttpGet]
+        public string GetByCategory(string category, int id)
+        {
+            return $"{category} + {id}";
+        }
+
+        [Route("api/values/byname/{name?}")]
+        [HttpGet]
+        public string GetByName(string name="Ghita")
+        {
+            return $"Name is: {name}";
+        }
+
         // POST api/values
         public void Post([FromBody]string value)
         {
