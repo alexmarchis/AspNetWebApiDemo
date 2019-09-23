@@ -1,53 +1,43 @@
-﻿using System;
+﻿using DataAccess;
+using DataAccess.Models;
+using ParkingLotV1.Models;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 
 namespace ParkingLotV1.Controllers
 {
-    public class ValuesController : ApiController
+    public class ParkingLotsController : ApiController
     {
-        // GET api/values
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET api/values/5
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // GET api/values/getbycategory/ABC/1
+        // GET api/parkinglots
         [HttpGet]
-        public string GetByCategory(string category, int id)
+        public async Task<IEnumerable<string>> GetAll()
         {
-            return $"{category} + {id}";
+            using(ParkingLotContext context = new ParkingLotContext())
+            {
+                return await context.ParkingLots.Select(pl => pl.Name).ToListAsync();
+            }
         }
 
-        [Route("api/values/byname/{name?}")]
-        [HttpGet]
-        public string GetByName(string name="Ghita")
+        // POST api/parkinglots
+        [HttpPost]
+        public async Task<IHttpActionResult> AddParkingLot(ParkingLotModel parkingLot)
         {
-            return $"Name is: {name}";
-        }
+            if (ModelState.IsValid == false) return BadRequest("Invalid parking lot");
 
-        // POST api/values
-        public void Post([FromBody]string value)
-        {
-        }
+            using (ParkingLotContext context = new ParkingLotContext())
+            {
+                ParkingLot existingLot = await context.ParkingLots.FindAsync(parkingLot.Name);
+                if(existingLot != null) return BadRequest("Parking lot already exists");
 
-        // PUT api/values/5
-        public void Put(int id, [FromBody]string value)
-        {
-        }
+                ParkingLot newLot = new ParkingLot { Name = parkingLot.Name };
+                context.ParkingLots.Add(newLot);
+                await context.SaveChangesAsync();
 
-        // DELETE api/values/5
-        public void Delete(int id)
-        {
+                return Created("api/parkinglots", newLot);
+            }
         }
     }
 }
