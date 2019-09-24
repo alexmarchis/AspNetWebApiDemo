@@ -1,6 +1,7 @@
 ﻿using DataAccess;
 using DataAccess.Models;
 using ParkingLotV1.Models;
+using ParkingLotV1.Services;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -11,6 +12,13 @@ namespace ParkingLotV1.Controllers
 {
     public class ParkingLotsController : ApiController
     {
+        private ISpecialService specialService;
+
+        public ParkingLotsController(ISpecialService specialService)
+        {
+            this.specialService = specialService;
+        }
+
         // GET api/parkinglots
         [HttpGet]
         public async Task<IEnumerable<string>> GetAll()
@@ -21,11 +29,18 @@ namespace ParkingLotV1.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("api/justspecial")]
+        public string JustSpecial()
+        {
+            return specialService.SpecialMethod();
+        }
+
         // POST api/parkinglots
         [HttpPost]
         public async Task<IHttpActionResult> AddParkingLot(ParkingLotModel parkingLot)
         {
-            if (ModelState.IsValid == false) return BadRequest("Invalid parking lot");
+            if (ModelState.IsValid == false) return BadRequest(ModelState);
 
             using (ParkingLotContext context = new ParkingLotContext())
             {
